@@ -23,7 +23,8 @@ The variables included in this dataset are:
 
 The dataset is stored in a comma-separated-value (CSV) file and there are a total of 17,568 observations in this dataset
 
-```{r LibraryLoad}
+
+```r
 library(dplyr)
 library(ggplot2)
 library(knitr)
@@ -33,7 +34,8 @@ options(scipen=5)           #prevent the use of scientific notation
 
 ###Loading and preprocessing the data
 
-```{r DataLoad}
+
+```r
 #Working DirectorY:
 # setwd("C:/Users/conlchri9061/Documents/Coursera/Reproducible Research/ReproRes_Project1/")
 
@@ -41,12 +43,12 @@ activity <- read.csv("activity.csv",
                      header=TRUE)
 
 activity$date <- as.Date(activity$date, "%Y-%m-%d")
-
 ```
 
 
 ### What is mean total number of steps taken per day?
-```{r CalculatingTotNumSteps}
+
+```r
 #Using dplyr to group and summarise
 
 Daily_steps_summary <- activity %>%
@@ -56,7 +58,8 @@ Daily_steps_summary <- activity %>%
 
 ###Total Number of steps taken per day (histogram)
 
-```{r Histogram of Total Steps}
+
+```r
 #If this was for a final report I'd clean up the labels
 
 ggplot(Daily_steps_summary, aes(x = date,
@@ -66,13 +69,20 @@ ggplot(Daily_steps_summary, aes(x = date,
                 October to November")
 ```
 
-The **mean** number of steps taken each day is *`r mean(Daily_steps_summary$total_steps, na.rm=TRUE)`*.
+```
+## Warning: Removed 8 rows containing missing values (position_stack).
+```
 
-The **median** number of steps taken each day is *`r median(Daily_steps_summary$total_steps, na.rm=TRUE)`*.
+![plot of chunk Histogram of Total Steps](figure/Histogram of Total Steps-1.png) 
+
+The **mean** number of steps taken each day is *10766.1886792*.
+
+The **median** number of steps taken each day is *10765*.
 
 ##Average Daily Activity Pattern
 
-```{r Average Daily Activity Pattern}
+
+```r
 Interval_average <- activity %>%                #Using activity data
         filter(!is.na(steps)) %>%               #Remove NA THEN
         group_by(interval) %>%                  #Group by Interval THEN
@@ -82,7 +92,11 @@ plot(Interval_average,
      Interval_average$average_steps,
      type="l", 
      main="Average Number of Steps \n by Daily Intervals") 
+```
 
+![plot of chunk Average Daily Activity Pattern](figure/Average Daily Activity Pattern-1.png) 
+
+```r
 #I prefer the approach below but I left the approach above 
 #to meet the project requirements
 
@@ -94,10 +108,10 @@ plot(Interval_average,
 #             x = "Intervals", y = "Steps")
 ```
 
-The interval with the **maximum** number of steps is *`r Interval_average[which.max(Interval_average$average_steps),1]`*  with an average of *`r Interval_average[which.max(Interval_average$average_steps),2]`* steps.
+The interval with the **maximum** number of steps is *835*  with an average of *206.1698113* steps.
 
 ##Imputing Missing Values
-There are *`r sum(is.na(activity$steps))`* records with **missing data**.
+There are *2304* records with **missing data**.
 
 The interval averages were used rather than the daily averages since there are some days where there were no steps taken and would introduce additional Null values.  A new dataframe was created by:
 
@@ -107,31 +121,63 @@ The interval averages were used rather than the daily averages since there are s
 
 - reducing the new dataframe to the original variables
 
-```{r Imputation}
 
+```r
 New_activity <- activity %>%                     #join interval averages
                 left_join (Interval_average)
+```
 
+```
+## Joining by: "interval"
+```
+
+```r
 New_activity$steps[is.na(New_activity$steps)] <- #sub in avg when null
         New_activity$average_steps
+```
 
+```
+## Warning in New_activity$steps[is.na(New_activity$steps)] <- New_activity
+## $average_steps: number of items to replace is not a multiple of replacement
+## length
+```
+
+```r
 New_activity <- select(New_activity,            #reduce to original variables
                        steps,
                        date,
                        interval)
-
 ```
 
 
 There are 17568 records and 3 variables in both the activity.csv file and the newly created New_activity.csv 
 
-```{r Comparison}
+
+```r
 str(activity)
+```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
+
+```r
 str(New_activity)
 ```
 
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : num  1.717 0.3396 0.1321 0.1509 0.0755 ...
+##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
 
-```{r Histogram of Imputed dataset}
+
+
+```r
 #Using dplyr to group and summarise
 
 Imputed_Daily_steps_summary <- New_activity %>%
@@ -144,15 +190,18 @@ ggplot(Imputed_Daily_steps_summary, aes(x = date,
         ggtitle("Total Number of Steps (Imputed Data) by Day from October to November")
 ```
 
-The **mean** number of steps taken each day is *`r mean(Imputed_Daily_steps_summary$total_steps, na.rm=TRUE)`*.  The difference between the mean of the imputed data set and the original data set is `r mean(Imputed_Daily_steps_summary$total_steps, na.rm=TRUE) - mean(Daily_steps_summary$total_steps, na.rm=TRUE)`
+![plot of chunk Histogram of Imputed dataset](figure/Histogram of Imputed dataset-1.png) 
 
-The **median** number of steps taken each day is *`r median(Imputed_Daily_steps_summary$total_steps, na.rm=TRUE)`*.  The difference between the imputed data set and the original data set is `r median(Imputed_Daily_steps_summary$total_steps, na.rm=TRUE) - median(Daily_steps_summary$total_steps, na.rm=TRUE)`
+The **mean** number of steps taken each day is *10766.1886792*.  The difference between the mean of the imputed data set and the original data set is 0
+
+The **median** number of steps taken each day is *10766.1886792*.  The difference between the imputed data set and the original data set is 1.1886792
 
 The imputation method had **no impact on the mean** and **increased the median** value.
 
 ##Are there differences in activity patterns between weekdays and weekends?
 
-```{r Weekday Comparison}
+
+```r
 New_activity$daytype <- weekdays(as.Date(New_activity$date))
 
 New_activity$weekend <- ifelse(New_activity$daytype 
@@ -161,7 +210,8 @@ New_activity$weekend <- ifelse(New_activity$daytype
                                "weekend", "weekday" )
 ```
 
-```{r Panel Plot of Weekdays/Weekends}
+
+```r
 #summarise data
 
 Interval_average_weekday <- New_activity %>%         #Using New_activity data
@@ -174,8 +224,9 @@ xyplot(average_steps ~ interval | weekend,
         layout = c(1, 2), 
         xlab = "Interval", 
        ylab = "Average number of steps")
-
 ```
+
+![plot of chunk Panel Plot of Weekdays/Weekends](figure/Panel Plot of Weekdays/Weekends-1.png) 
 
 There does appear to be differences in activity between weekdays and weekends:  
 
